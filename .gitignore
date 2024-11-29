@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Logging
+*.log
+logs/
+
+# Output Files
+output/
+*.pdf
+*.json
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
