@@ -1,18 +1,16 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+from tkinterdnd2 import TkinterDnD, DND_FILES
 from typing import Optional
+import os
 
 from app.config import AppConfig
 from app.core.json_to_pdf import JsonToPdfConverter
 from app.core.pdf_to_json import PdfToJsonConverter
-from app.utils.file_utils import FileUtils
 
 class DocuBridgeApp:
-    """
-    Main application GUI with conversion capabilities.
-    """
     def __init__(self, config: AppConfig):
-        self.root = tk.Tk()
+        self.root = TkinterDnD.Tk()  # Use TkinterDnD for drag-and-drop support
         self.root.title("DocuBridge: JSON ↔ PDF Converter")
         self.config = config
 
@@ -20,110 +18,79 @@ class DocuBridgeApp:
         self._create_widgets()
 
     def _setup_ui(self):
-        """
-        Configure UI Layout and styling
-        """
         self.root.geometry("800x600")
         self.root.configure(bg="#f0f0f0")
+        self.root.grid_rowconfigure(1, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
 
     def _create_widgets(self):
-        """
-        Create and layout application widgets
-        """
         # Conversion type selection
+        conversion_frame = ttk.LabelFrame(self.root, text="Conversion Type", padding=(10, 10, 10, 0))
+        conversion_frame.grid(row=0, column=0, padx=20, pady=20, sticky="ew")
+
         self.conversion_var = tk.StringVar(value="JSON_TO_PDF")
-        conversion_frame = ttk.LabelFrame(self.root, text="Conversion Type")
-        conversion_frame.pack(padx=10, pady=10, fill="x")
-
-        json_to_pdf_radio = ttk.Radiobutton(
-            conversion_frame,
-            text="JSON to PDF",
-            variable=self.conversion_var,
-            value="JSON_TO_PDF",
-        )
-
-        pdf_to_json_radio = ttk.Radiobutton(
-            conversion_frame,
-            text="PDF to JSON",
-            variable=self.conversion_var,
-            value="PDF_TO_JSON",
-        )
+        json_to_pdf_radio = ttk.Radiobutton(conversion_frame, text="JSON to PDF", variable=self.conversion_var, value="JSON_TO_PDF")
+        pdf_to_json_radio = ttk.Radiobutton(conversion_frame, text="PDF to JSON", variable=self.conversion_var, value="PDF_TO_JSON")
         json_to_pdf_radio.pack(side="left", padx=10)
         pdf_to_json_radio.pack(side="left")
 
-        # File selection buttons
+        # File selection and conversion
         file_frame = ttk.Frame(self.root)
-        file_frame.pack(padx=10, pady=10)
+        file_frame.grid(row=1, column=0, padx=20, pady=20, sticky="nsew")
 
-        self.input_file_button = ttk.Button(
-            file_frame,
-            text="Select Input File",
-            command=self._select_input_file
-        )
-        self.input_file_button.pack(side="left", padx=5)
+        self.input_file_label = ttk.Label(file_frame, text="Input File:")
+        self.input_file_label.pack(side="left", padx=(0, 10))
+
+        self.input_file_path = tk.StringVar()
+        self.input_file_entry = ttk.Entry(file_frame, textvariable=self.input_file_path, width=50)
+        self.input_file_entry.pack(side="left", padx=(0, 10))
+
+        self.input_file_button = ttk.Button(file_frame, text="Select Input File", command=self._select_input_file)
+        self.input_file_button.pack(side="left", padx=(0, 10))
+
+        self.convert_button = ttk.Button(file_frame, text="Convert", command=self._perform_conversion)
+        self.convert_button.pack(side="left")
+
+        # Conversion progress
+        self.progress_var = tk.DoubleVar()
+        self.progress_bar = ttk.Progressbar(self.root, variable=self.progress_var, mode="indeterminate")
+        self.progress_bar.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="ew")
+
+        # Drag and drop
+        self.root.drop_target_register(DND_FILES)
+        self.root.dnd_bind("<<Drop>>", self._handle_drop)
 
     def _select_input_file(self):
-        """
-        Handle input file selection based on conversion type
-        """
-        conversion_type = self.conversion_var.get()
-
-        if conversion_type == "JSON_TO_PDF":
-            file_types = [("JSON Files", "*.json")]
-            conversion_method = self._convert_json_to_pdf
-        else:
-            file_types = [("PDF Files", "*.pdf")]
-            conversion_method = self._convert_pdf_to_json
-        
+        file_types = [("JSON Files", "*.json")] if self.conversion_var.get() == "JSON_TO_PDF" else [("PDF Files", "*.pdf")]
         file_path = filedialog.askopenfilename(filetypes=file_types)
-
         if file_path:
-            self._perform_conversion(file_path, conversion_method)
+            self.input_file_path.set(file_path)
 
-    def _perform_conversion(self, input_path, conversion_method):
-        """
-        Execute conversion and handle result
-        """
+    def _perform_conversion(self):
         try:
-            output_path = self.config.get_unique_output_path(
-                "converted_file",
-                "pdf" if conversion_method == self._convert_json_to_pdf else "json"
-            )
-            success = conversion_method(input_path, str(output_path))
+            self.progress_bar.start()
+            input_path = self.input_file_path.get()
+            conversion_type = self.conversion_var.get()
+
+            if conversion_type == "JSON_TO_PDF":
+                output_path = self.config.get_unique_output_path("converted_file", "pdf")
+                success = JsonToPdfConverter.convert(input_path, str(output_path))
+            else:
+                output_path = self.config.get_unique_output_path("converted_file", "json")
+                success = PdfToJsonConverter.convert(input_path, str(output_path))
 
             if success:
-                messagebox.showinfo(
-                    "Conversion Successful",
-                    f"File saved at {output_path}"
-                )
+                messagebox.showinfo("Conversion Successful", f"File saved at {output_path}")
             else:
-                messagebox.showerror(
-                    "Conversion Failed",
-                    "Unable to complete the conversion process"
-                )
+                messagebox.showerror("Conversion Failed", "Unable to complete the conversion process")
         except Exception as e:
             messagebox.showerror("Conversion Error", str(e))
+        finally:
+            self.progress_bar.stop()
 
-    def _convert_json_to_pdf(
-            self,
-            input_path: str,
-            output_path: str
-    ) -> bool:
-        """JSON to PDF conversion wrapper"""
-        return JsonToPdfConverter.convert(input_path, output_path)
-    
-    def _convert_pdf_to_json(
-            self,
-            input_path: str,
-            output_path: str
-    ) -> bool:
-        """PDF to JSON conversion wrapper"""
-        return PdfToJsonConverter.convert(input_path, output_path)
-    
+    def _handle_drop(self, event):
+        file_path = event.data.strip('{').strip('}')
+        self.input_file_path.set(file_path)
+
     def run(self):
-        """
-        Start the application event loop
-        """
-        self.root.mainloop() # Start the tkinter event loop
-
-        
+        self.root.mainloop()

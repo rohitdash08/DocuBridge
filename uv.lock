@@ -169,8 +169,10 @@ dependencies = [
     { name = "jsonschema" },
     { name = "pdfplumber" },
     { name = "pytest" },
+    { name = "python-tkdnd" },
     { name = "reportlab" },
     { name = "structlog" },
+    { name = "tkinterdnd2" },
 ]
 
 [package.metadata]
@@ -179,8 +181,10 @@ requires-dist = [
     { name = "jsonschema", specifier = ">=4.23.0" },
     { name = "pdfplumber", specifier = ">=0.11.4" },
     { name = "pytest", specifier = ">=8.3.3" },
+    { name = "python-tkdnd", specifier = ">=0.2.1" },
     { name = "reportlab", specifier = ">=4.2.5" },
     { name = "structlog", specifier = ">=24.4.0" },
+    { name = "tkinterdnd2", specifier = ">=0.4.2" },
 ]
 
 [[package]]
@@ -364,6 +368,18 @@ wheels = [
 ]
 
 [[package]]
+name = "python-tkdnd"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "ttkwidgets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3a/bf/06781b8ecdff505d021996fab9ebb8cc18606576f0ed34d0d6d75b337b6f/python-tkdnd-0.2.1.tar.gz", hash = "sha256:dbce480c1ab5923075aa6fa02e8ae85b984886dfaf20c82d20d78420ad19451b", size = 157888 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/95/28/50130cd6667454c7c04100e8697e70c03428c8a672ba0f60601b6a6f1e02/python_tkdnd-0.2.1-py3-none-any.whl", hash = "sha256:e476f02c5a9f36361f494cb9e6bc4515790e224a22b4d14b8fbd90d7c1fc0e81", size = 172610 },
+]
+
+[[package]]
 name = "referencing"
 version = "0.35.1"
 source = { registry = "https://pypi.org/simple" }
@@ -444,3 +460,21 @@ sdist = { url = "https://files.pythonhosted.org/packages/78/a3/e811a94ac38538268
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bf/65/813fc133609ebcb1299be6a42e5aea99d6344afb35ccb43f67e7daaa3b92/structlog-24.4.0-py3-none-any.whl", hash = "sha256:597f61e80a91cc0749a9fd2a098ed76715a1c8a01f73e336b746504d1aad7610", size = 67180 },
 ]
+
+[[package]]
+name = "tkinterdnd2"
+version = "0.4.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a1/38/5c5e18324d024a3e4a0bce18875f057f1b3c8044ea5b15bcf5ffad261275/tkinterdnd2-0.4.2.tar.gz", hash = "sha256:00180ac38d86578441dea4662026c7867a022e14501ad492f81e22e22135ceb6", size = 443991 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/15/9b/768f66f3bfa0a0d7d17eb2e3712a77b4ce5686b8450e396df0acbeeb7f0a/tkinterdnd2-0.4.2-py3-none-any.whl", hash = "sha256:73eb0a2e380f49687c1ac3b499014b09b53febc7f93d7ab4fefa4ede9691ab57", size = 492701 },
+]
+
+[[package]]
+name = "ttkwidgets"
+version = "0.13.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pillow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/12/03/95275645ec464579967d0c6af2764be262b9f2cf7c479cfbd81c79478db8/ttkwidgets-0.13.0.tar.gz", hash = "sha256:9b1d69dffebef1820ee46b244469913d1911a563a15bb9b0823c71c950daead7", size = 86188 }
